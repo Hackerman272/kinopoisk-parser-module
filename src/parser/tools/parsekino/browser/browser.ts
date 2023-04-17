@@ -58,11 +58,12 @@ export class Browser {
             await page.waitForXPath(`//input [@class='${searchResultSelector}']`);
             setTimeout(() => {page.click(`.${searchResultSelector}`)}, Math.floor(Math.random() * 200))
             await page.click(`.${searchResultSelector}`);
-            await this.getHtml(url, scr, needClick, clickTarget)
+            return await this.getHtml(url, scr, needClick, clickTarget)
         }
 
         if (needClick === true) {
             // Wait and click on first result
+            // console.log(await page.evaluate(() => {return document.body.innerHTML}))
             const searchResultSelector = clickTarget;
             await page.waitForXPath(`//div [@class='${clickTarget}']`);
             await page.click(`.${searchResultSelector}`);

@@ -15,27 +15,36 @@ export class ParserService {
       "films": [],
       "persons": []
     }
-    for (let i = 0; i <= dto.entitiesAmount; i++) {
-      await parseFilmByIdWithLinkedPersons(762738)
-      break
+
+    await parseFilmByIdWithLinkedPersons(762738)
+
+    // add i counter
+    for (let id of parsingQueueFilms) {
+      await parseFilmByIdWithLinkedPersons(id)
     }
 
+    for (let id of parsingQueuePersons) {
+      await parsePerson(id)
+    }
+
+    async function parsePerson(personId) {
+      if (!parsedPersons.includes(personId)) {
+        const newKinopoiskParser = new Kinopoisk(`https://www.kinopoisk.ru/name/${personId}/`)
+        console.log(personId)
+        resultFilmsPersonsData.persons.push(await newKinopoiskParser.getPerson(personId))
+        parsedPersons.push(personId);
+      }
+    }
 
     async function parseFilmByIdWithLinkedPersons(filmId){
-      async function parsePerson(personId) {
-        console.log(personId)
-        if (!parsedPersons.includes(personId)) {
-          console.log(personId)
-          resultFilmsPersonsData.persons.push(await newKinopoiskParser.getPerson(personId))
-          parsedPersons.push(personId);
-          console.log(resultFilmsPersonsData.persons)
-        }
+      if (parsedFilms.includes(filmId)) {
+        return;
       }
       const newKinopoiskParser = new Kinopoisk(`https://www.kinopoisk.ru/film/${filmId}/`)
       let result = await newKinopoiskParser.getInfo()
       result["simularFilms"] = await newKinopoiskParser.getSimilar()
       result["simularFilms"].forEach(film => {
-        const kinopoiskId = parseInt(film.url.split('/')[4])
+        const kinopoiskId = parseInt(film.url.split('/')[2])
         if (!parsedFilms.includes(kinopoiskId)) {
           parsingQueueFilms.push(kinopoiskId)
           // setTimeout(() => {
@@ -65,6 +74,8 @@ export class ParserService {
         parsingQueuePersons.push(personId)
       })
     }
+    console.log(parsingQueuePersons)
+    console.log(parsingQueueFilms)
     console.log(resultFilmsPersonsData)
   }
 }
