@@ -1,9 +1,8 @@
 const fetch = require('node-fetch');
 const puppeteer = require('puppeteer');
 
-class Browser{
-
-    static async fetchHtml(url){
+export class Browser {
+    async fetchHtml(url: string){
        return  fetch(url)
                 .then((response) => {
                     return response.text();
@@ -12,7 +11,7 @@ class Browser{
                     return data
                 });
     }
-    static async fetchJson(url){
+    async fetchJson(url){
           return fetch(url)
                 .then((response) => {
                     return response.json();
@@ -22,7 +21,8 @@ class Browser{
                 });
     }
 
-    static async getHtml(url,scr){
+    async getHtml(url: string, scr, needClick: boolean = false,
+                  clickTarget: string | undefined = undefined){
         const args = [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -30,7 +30,7 @@ class Browser{
             '--window-position=0,0',
             '--ignore-certifcate-errors',
             '--ignore-certifcate-errors-spki-list',
-            '--user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"'
+            '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0"'
         ];
 
         const chromeOptions = {
@@ -47,9 +47,26 @@ class Browser{
             height: 1080
         })
 
+
         await page.goto(url)
         await page.waitForTimeout(20)
 
+        let captchaProtection = (await page.$('.CheckboxCaptcha-Button')) || null;
+        if (captchaProtection !== null) {
+            console.log('!!! parsing protection ON !!!')
+            const searchResultSelector = 'CheckboxCaptcha-Button';
+            await page.waitForXPath(`//input [@class='${searchResultSelector}']`);
+            setTimeout(() => {page.click(`.${searchResultSelector}`)}, Math.floor(Math.random() * 200))
+            await page.click(`.${searchResultSelector}`);
+            await this.getHtml(url, scr, needClick, clickTarget)
+        }
+
+        if (needClick === true) {
+            // Wait and click on first result
+            const searchResultSelector = clickTarget;
+            await page.waitForXPath(`//div [@class='${clickTarget}']`);
+            await page.click(`.${searchResultSelector}`);
+        }
 
         if(scr == true){
             await page.screenshot({ path: 'example.png' });
@@ -62,5 +79,3 @@ class Browser{
 
     }
 }
-
-module.exports = Browser
