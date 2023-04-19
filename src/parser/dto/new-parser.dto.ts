@@ -11,6 +11,11 @@ export class NewParserDto {
   @IsNumber()
   readonly entitiesAmount: number
 
+  @ApiProperty({example: 123, description: "id фильма для старта"})
+  @IsNumber()
+  @IsOptional()
+  readonly startFilmId: number
+
   @ApiProperty({example: 600, description: "задержка в мс между запросами на парсинг 1 сущности"})
   @IsNumber()
   @IsOptional()

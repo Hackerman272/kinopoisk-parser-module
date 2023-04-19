@@ -2,6 +2,11 @@ const fetch = require('node-fetch');
 const puppeteer = require('puppeteer');
 
 export class Browser {
+    private delay(time) {
+        return new Promise(function(resolve) {
+            setTimeout(resolve, time)
+        });
+    }
     async fetchHtml(url: string){
        return  fetch(url)
                 .then((response) => {
@@ -30,7 +35,7 @@ export class Browser {
             '--window-position=0,0',
             '--ignore-certifcate-errors',
             '--ignore-certifcate-errors-spki-list',
-            '--user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0"'
+            '--user-agent="Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3312.0 Safari/537.36"'
         ];
 
         const chromeOptions = {
@@ -51,13 +56,15 @@ export class Browser {
         await page.goto(url)
         await page.waitForTimeout(20)
 
+        // console.log(await page.evaluate(() => {return document.body.innerHTML}))
         let captchaProtection = (await page.$('.CheckboxCaptcha-Button')) || null;
         if (captchaProtection !== null) {
             console.log('!!! parsing protection ON !!!')
+            await this.delay(Math.floor(Math.random() * 10000 + 1000));
             const searchResultSelector = 'CheckboxCaptcha-Button';
-            await page.waitForXPath(`//input [@class='${searchResultSelector}']`);
-            setTimeout(() => {page.click(`.${searchResultSelector}`)}, Math.floor(Math.random() * 200))
-            await page.click(`.${searchResultSelector}`);
+            await page.waitForXPath(`//input [@class='${searchResultSelector}']`)
+            await page.click(`.${searchResultSelector}`)
+            await browser.close()
             return await this.getHtml(url, scr, needClick, clickTarget)
         }
 
@@ -77,6 +84,5 @@ export class Browser {
         await browser.close()
 
         return bodyHTML
-
     }
 }
