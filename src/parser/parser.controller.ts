@@ -14,6 +14,7 @@ export class ParserController {
   // @UseGuards(RolesGuard)
   @Post('/parse')
   addRole(@Body() dto: NewParserDto){
-    return this.parserService.parseSomeNumberEntities(dto);
+    this.parserService.parseSomeNumberEntities(dto);
+    return {"message": `задача на парсинг принята в работу`}
   }
 }

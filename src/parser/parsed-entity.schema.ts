@@ -3,15 +3,16 @@ import { HydratedDocument } from 'mongoose';
 
 export type ParsedEntityDocument = HydratedDocument<ParsedEntity>;
 
-enum entityStatus {
+export enum entityStatus {
   WaitForParsing = "waitForParsing",
   Parsing = "parsing",
   Parsed = "parsed",
+  UploadingToReceiver = "uploadingToReceiver",
   UploadedToReceiver = "uploadedToReceiver",
   NotFound = "notFound"
 }
 
-enum entityType {
+export enum entityType {
   Person = "person",
   Film = "film",
   Review = "review"

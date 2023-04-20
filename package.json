@@ -8,8 +8,8 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "start:dev": "nest start --watch",
+    "start": "cross-env NODE_ENV=production nest start",
+    "start:dev": "cross-env NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "test": "jest",
@@ -20,17 +20,22 @@
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
+    "@nestjs/microservices": "^9.4.0",
     "@nestjs/mongoose": "^9.2.2",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^6.3.0",
+    "amqp-connection-manager": "^4.1.12",
+    "amqplib": "^0.10.3",
     "class-validator": "^0.14.0",
     "mongodb": "^5.2.0",
     "mongoose": "^7.0.4",
     "node-html-parser": "^6.1.5",
     "parsekino": "^0.1.12",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

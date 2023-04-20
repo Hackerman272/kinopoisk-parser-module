@@ -1,4 +1,5 @@
-import { Browser } from "../browser/browser"
+import { Browser } from "../browser/browser";
+
 const jsdom = require("jsdom")
 const {JSDOM} = jsdom
 
@@ -29,20 +30,27 @@ export class Kinopoisk {
             const commentsElements = dom.window.document.querySelectorAll(`.answer_${level}`)
 
             for (let commentTree of commentsElements) {
-                const commentId = parseInt(commentTree.querySelector('.toppy').getAttribute('id').replace("comment", ""))
-                const author =  commentTree.querySelector('.name').textContent
-                const text = commentTree.querySelector('.text').textContent
-                commentsData.push({
-                    'commentId': commentId,
-                    'author': author,
-                    'text': text,
-                    'parentId': parentId
-                })
-                level++
-                if (level > 2) {
+                try {
+                    const commentId = parseInt(commentTree.querySelector(".toppy").getAttribute("id").replace("comment", ""));
+                    const author = commentTree.querySelector(".name").textContent;
+                    const text = commentTree.querySelector(".text").textContent;
+                    const commentDate = commentTree.querySelector(".date").textContent.split(',')[0]
+                    commentsData.push({
+                        "commentId": commentId,
+                        "author": author,
+                        "text": text,
+                        "parentId": parentId,
+                        "commentDate": commentDate
+                    });
+                    level++
+                    if (level > 2) {
+                        return
+                    }
+                    await getCommentsLoop(level, commentId)
+                } catch (Error) {
+                    console.log(Error)
                     return
                 }
-                await getCommentsLoop(level, commentId)
             }
         }
         return commentsData
@@ -63,12 +71,14 @@ export class Kinopoisk {
             const text = reviewEl.querySelector('._reachbanner_').textContent
             const reviewId = reviewEl.getAttribute('data-id')
             const userId = reviewEl.querySelector('.profile_name').querySelector('a').getAttribute('href').split('/')[2]
+            const reviewDate = reviewEl.querySelector('.date').textContent.split(' | ')[0]
             result.push({
                 'author': author,
                 'title': title,
                 'text': text,
                 'reviewId': reviewId,
                 'userId': userId,
+                'reviewDate': reviewDate,
                 'comments': await Kinopoisk.getComments(userId, reviewId)
             })
         }
@@ -96,12 +106,20 @@ export class Kinopoisk {
             photoLink = photoLinkOrPlaceholder
         }
         const name: string = dom.window.document.querySelector('.styles_primaryName__2Zu1T').textContent
-        const enName: string = dom.window.document.querySelector('.styles_secondaryName__MpB48').textContent
+
+        let enName: string = ""
+        if (dom.window.document.querySelector('.styles_secondaryName__MpB48')){
+            enName = dom.window.document.querySelector('.styles_secondaryName__MpB48').textContent
+        }
+
         let professionArr: {}[] = []
         const professionElement = dom.window.document.querySelectorAll('.styles_row__da_RK')
         professionElement.forEach((el) => {
             if (el.querySelector('.styles_title__b1HVo').textContent === "Карьера") {
-                professionArr.push(el.querySelector('.styles_role__s4xV4').textContent)
+                let professionArrNodes = el.querySelectorAll('.styles_role__s4xV4')
+                professionArrNodes.forEach(node => {
+                    professionArr.push(node.textContent)
+                })
             }
         })
         return {
@@ -126,7 +144,7 @@ export class Kinopoisk {
             result.push({
                 'name': el.querySelector('a').textContent,
                 'url': link,
-                'kinopoiskId': link.split('/')[2]
+                'kinopoiskId': parseInt(link.split('/')[2])
             })
         })
         return result
@@ -177,14 +195,22 @@ export class Kinopoisk {
             trailerLink = domTrailer.window.document.querySelector('.discovery-trailers-embed-iframe').getAttribute('src')
         }
 
+        const genresArr = this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'), "genre")
+        const countriesArr = this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'), "country")
+
         return {
             'name': dom.window.document.querySelector('h1').textContent,
-            'originalName': this.checkContent('.styles_originalTitle__JaNKM'),
+            'originalName': this.checkContent('.styles_originalTitle__JaNKM')? this.checkContent('.styles_originalTitle__JaNKM') : dom.window.document.querySelector('h1').textContent,
             'description': description,
             'actors': actors,
             'poster': poster,
             'trailerLink': trailerLink,
             'year': year,
+            'movieLength': this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'), "length"),
+            'ageRating': this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'), "ageLimit"),
+            'genres': genresArr,
+            'countries': countriesArr,
+            'fullDescription': this.checkContent('.styles_paragraph__wEGPz'),
             'rate': {
                 'kinopoisk': this.checkContent('a.film-rating-value'),
                 'kinopoiskCount': this.checkContent(' .styles_count__iOIwD'),
@@ -198,10 +224,32 @@ export class Kinopoisk {
 
     }
 
-    parseEncyclopedia(node) {
+    parseEncyclopedia(node, specialEntity: "genre" | "country" | "length" | "ageLimit" | null = null) {
         const encyclopedia = []
-        node.forEach((el) => {
+        for (let el of node) {
             const elName = el.querySelector('.styles_title__b1HVo').textContent
+            if (specialEntity === "genre") {
+                if (elName === "Жанр") {
+                    const nodesArr = el.querySelectorAll('.styles_link__3QfAk')
+                    return this.getDictDetailsArr(nodesArr, "genre")
+                }
+            }
+            if (specialEntity ===  "country") {
+                if (elName === "Страна") {
+                    const nodesArr = el.querySelectorAll('.styles_link__3QfAk')
+                    return this.getDictDetailsArr(nodesArr, "country")
+                }
+            }
+            if (specialEntity ===  "length") {
+                if (elName === "Время") {
+                    return el.querySelector('.styles_value__g6yP4').textContent
+                }
+            }
+            if (specialEntity ===  "ageLimit") {
+                if (elName === "Возраст") {
+                    return el.querySelector('.styles_value__g6yP4').textContent
+                }
+            }
             let elValue: string = '';
             let elValueArr: number[] = []
             let elLink: string = ''
@@ -230,16 +278,40 @@ export class Kinopoisk {
                 'value': (elValueArr.length === 0)? elValue: elValueArr,
                 'type': elType
             })
-        })
+        }
         return encyclopedia
+    }
+
+    getDictDetailsArr(nodes, dictType: "genre" | "country") {
+        let result: {}[] = []
+        nodes.forEach(node => {
+            if (dictType === "genre") {
+                if (!node.getAttribute("href").includes("keywords") && node.textContent !== "...") {
+                    result.push({
+                        "genre": node.textContent,
+                        "genreEng": node.getAttribute("href").split("--")[1].split("/")[0]
+                    })
+                }
+            } else {
+                if (!node.getAttribute("href").includes("keywords") && node.textContent !== "...") {
+                    result.push({
+                        "country": node.textContent,
+                        "countryId": parseInt(node.getAttribute("href").split("--")[1].split("/")[0])
+                    })
+                }
+            }
+        })
+        return result
     }
 
     parseName(node) {
         const name = []
         node.forEach((el) => {
+            const link = el.querySelector('a.styles_link__Act80').getAttribute('href')
             name.push({
                 'name': el.querySelector('a.styles_link__Act80').textContent,
-                'link': el.querySelector('a.styles_link__Act80').getAttribute('href'),
+                'link': link,
+                'kinopoiskId': parseInt(link.split('/')[2])
             })
         })
         return name
