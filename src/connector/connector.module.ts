@@ -13,15 +13,14 @@ import { UploadingTask, UploadingTaskSchema } from "./uploading-tasks.schema";
     {
       provide: 'TASK_RMQ_SERVICE',
       useFactory: (configService: ConfigService) => {
-        const user = configService.get('RABBITMQ_USER');
-        const password = configService.get('RABBITMQ_PASSWORD');
-        const host = configService.get('RABBITMQ_HOST');
         const queueName = configService.get('RABBITMQ_UPLOADING_TASKS_QUEUE');
+        const rabbitMQ_cloud_url = configService.get('RABBITMQ_CLOUD_URL')
+
 
         return ClientProxyFactory.create({
           transport: Transport.RMQ,
           options: {
-            urls: [`amqp://${user}:${password}@${host}`],
+            urls: [rabbitMQ_cloud_url],
             queue: queueName,
             queueOptions: {
               durable: true,

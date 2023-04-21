@@ -10,7 +10,8 @@ import * as process from "process";
 @Module({
   imports: [ParserModule,
     ConnectorModule,
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017/parser'),
+    MongooseModule.forRoot("mongodb+srv://mongoDB:5jMFad4-afVmX*u@ksptestcluster.8cx5zpk.mongodb.net/?retryWrites=true&w=majority"),
+    // MongooseModule.forRoot('mongodb://127.0.0.1:27017/parser'),
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`
     }),

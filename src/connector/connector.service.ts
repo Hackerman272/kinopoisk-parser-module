@@ -34,7 +34,7 @@ export class ConnectorService {
     await newTask.save()
     const JSONtoUpload = await this.prepareDataToRmq(taskInternalId, dto.entitiesAmount, dto.entityType)
     await this.uploadDataToRmq(taskInternalId, JSONtoUpload)
-    return true;
+    return {"parserInternalId": taskInternalId};
   }
 
   private async uploadDataToRmq(taskInternalId, JSON) {

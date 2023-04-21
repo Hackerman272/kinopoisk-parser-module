@@ -9,15 +9,13 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const user = configService.get('RABBITMQ_USER');
-  const password = configService.get('RABBITMQ_PASSWORD');
-  const host = configService.get('RABBITMQ_HOST');
+  const rabbitMQ_cloud_url = configService.get('RABBITMQ_CLOUD_URL')
   const queueName = configService.get('RABBITMQ_UPLOADING_TASKS_QUEUE');
 
   const microservice = app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
-      urls: [`amqp://${user}:${password}@${host}`],
+      urls: [rabbitMQ_cloud_url],
       queue: queueName,
       queueOptions: {
         durable: true

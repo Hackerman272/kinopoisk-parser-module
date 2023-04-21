@@ -36,10 +36,4 @@ export class ConnectorController {
     console.log(data)
     return this.connectorService.test();
   }
-  //
-  // @EventPattern('upload_data')
-  // testReviewTaskStatusResponse(@Body() data) {
-  //   console.log(data)
-  //   return this.connectorService.test();
-  // }
 }
