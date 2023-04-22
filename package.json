@@ -29,6 +29,7 @@
     "amqp-connection-manager": "^4.1.12",
     "amqplib": "^0.10.3",
     "class-validator": "^0.14.0",
+    "cross-env": "^7.0.3",
     "mongodb": "^5.2.0",
     "mongoose": "^7.0.4",
     "node-html-parser": "^6.1.5",
