@@ -103,6 +103,10 @@ export class ConnectorService {
     console.log(taskInternalId, taskStatus)
     const TaskData = await this.uploadingTaskModel.findOneAndUpdate({taskInternalId: taskInternalId},
       {taskStatus: taskStatus})
+    if (TaskData === null) {
+      return {"message": `Задачи с номером ${taskInternalId} не существует`,
+        "parserInternalId": null}
+    }
     const entityType = TaskData.taskEntityType
 
     const entityStatus = taskEntitiesStatusesMapping[taskStatus]

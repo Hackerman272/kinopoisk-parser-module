@@ -1,0 +1,16 @@
+version: '3.0'
+
+services:
+  kinopoisk-parser-module:
+    image: kinopoisk-parser-module:01
+    env_file:
+      - .development.env
+    volumes:
+      - ./app:/usr/src/app
+      - /app/node_modules
+    ports:
+      - 5000:5000
+      - 9229:9229
+    command: npm run start:dev
+    restart: always
+
