@@ -192,7 +192,9 @@ export class Kinopoisk {
             const trailerHtml = await trailerPage.getHtml(`https://www.kinopoisk.ru${trailerUrlLocation}`,
               this.scr, true, 'js-kinopoisk-widget-embed')
             const domTrailer = new JSDOM(trailerHtml);
-            trailerLink = domTrailer.window.document.querySelector('.discovery-trailers-embed-iframe').getAttribute('src')
+            if (domTrailer.window.document.querySelector('.discovery-trailers-embed-iframe')) {
+                trailerLink = domTrailer.window.document.querySelector('.discovery-trailers-embed-iframe').getAttribute('src')
+            }
         }
 
         const genresArr = this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'), "genre")
@@ -331,17 +333,15 @@ export class Kinopoisk {
     }
 
     checkActors(){
-        let result:any[];
+        let actorsDubsBlocks:any[];
 
         try {
-            result = this.parseName(this.dom.window.document.querySelector('.styles_actors__wn_C4')
-                .querySelectorAll('.styles_root__vKDSE '))
+            actorsDubsBlocks = this.parseName(this.dom.window.document.querySelectorAll('.styles_root__vKDSE '))
         } catch(Error) {
-            // console.log(Error)
-            result = []
+            console.log(Error)
+            actorsDubsBlocks = []
         }
-        // console.log(result)
-        return result
+        return actorsDubsBlocks
     }
 
 }
