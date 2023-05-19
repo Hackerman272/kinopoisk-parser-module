@@ -5,7 +5,6 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ClientProxyFactory, Transport } from "@nestjs/microservices";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ParsedEntity, ParsedEntitySchema } from "../parser/parsed-entity.schema";
-import { EntitiesCounter, ParserCounterSchema } from "../parser/parser-counters.schema";
 import { UploadingTask, UploadingTaskSchema } from "./uploading-tasks.schema";
 
 @Module({
@@ -32,9 +31,7 @@ import { UploadingTask, UploadingTaskSchema } from "./uploading-tasks.schema";
     }],
   controllers: [ConnectorController],
   imports: [MongooseModule.forFeature([{ name: UploadingTask.name, schema: UploadingTaskSchema }]),
-    MongooseModule.forFeature([{ name: UploadingTask.name, schema: UploadingTaskSchema }]),
     MongooseModule.forFeature([{ name: ParsedEntity.name, schema: ParsedEntitySchema }]),
-    MongooseModule.forFeature([{ name: EntitiesCounter.name, schema: ParserCounterSchema }]),
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`
     }),]

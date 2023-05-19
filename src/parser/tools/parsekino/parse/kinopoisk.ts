@@ -163,6 +163,7 @@ export class Kinopoisk {
 
         const encyclopedia = this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'))
         const actors: any[] = this.checkActors()
+        const dubActors: any[] = this.checkActors(true)
 
         let description = ''
         if(dom.window.document.querySelector('p.styles_paragraph__wEGPz')){
@@ -206,6 +207,7 @@ export class Kinopoisk {
             'description': description,
             'actors': actors,
             'poster': poster,
+            'dubActors': dubActors,
             'trailerLink': trailerLink,
             'year': year,
             'movieLength': this.parseEncyclopedia(dom.window.document.querySelectorAll('.styles_row__da_RK'), "length"),
@@ -221,7 +223,6 @@ export class Kinopoisk {
             },
 
             'encyclopedia': encyclopedia,
-
         }
 
     }
@@ -332,14 +333,21 @@ export class Kinopoisk {
         return result
     }
 
-    checkActors(){
+    checkActors(need_dub: boolean = false){
         let actorsDubsBlocks:any[];
-
+        let searchingElement = this.dom.window.document.querySelectorAll('[data-tid="38ecf27e"]')
+        if (need_dub === true && searchingElement[1]) {
+            searchingElement = searchingElement[1];
+        } else if (need_dub === true && !searchingElement[1]) {
+            return [];
+        }
+        else if (need_dub === false) {
+            searchingElement = searchingElement[0]
+        }
         try {
-            actorsDubsBlocks = this.parseName(this.dom.window.document.querySelectorAll('.styles_root__vKDSE '))
+            actorsDubsBlocks = this.parseName(searchingElement.querySelectorAll('.styles_root__vKDSE '))
         } catch(Error) {
             console.log(Error)
-            actorsDubsBlocks = []
         }
         return actorsDubsBlocks
     }

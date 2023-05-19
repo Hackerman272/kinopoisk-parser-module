@@ -2,7 +2,7 @@ version: '3.0'
 
 services:
   kinopoisk-parser-module:
-    image: kinopoisk-parser-module:01
+    image: kinopoisk-parser-module:0.1
     env_file:
       - .development.env
     volumes:

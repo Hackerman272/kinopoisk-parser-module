@@ -1,27 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { NewParserDto } from "./dto/new-parser.dto";
 import { Kinopoisk } from "./tools/parsekino/parse/kinopoisk";
-import { errorContext } from "rxjs/internal/util/errorContext";
 import { InjectModel, Prop } from "@nestjs/mongoose";
 import { ParsedEntity } from "./parsed-entity.schema";
 import { Model } from "mongoose";
-import { EntitiesCounter } from "./parser-counters.schema";
 
 // всё переписано максимально последовательно, чтобы из-за десятков параллельных запросов не банил кинопописк.
 // Параллельные варсии жёстко блокировались по IP.
 @Injectable()
 export class ParserService {
-  constructor(@InjectModel(ParsedEntity.name) private parserModel: Model<ParsedEntity>,
-              @InjectModel(EntitiesCounter.name) private parserCounter: Model<EntitiesCounter>) {}
+  constructor(@InjectModel(ParsedEntity.name) private parserModel: Model<ParsedEntity>) {}
 
   async parseSomeNumberEntities(dto: NewParserDto) {
-    let filmsPersonsKinopoiskIdCounter = await this.parserCounter.find({}).exec();
-    let startingKinopoiskFilmId = 0
-    let startingKinopoiskPersonId = 0
-    if (filmsPersonsKinopoiskIdCounter.length !== 0) {
-        startingKinopoiskFilmId = filmsPersonsKinopoiskIdCounter["lastParsedFilmId"]
-        startingKinopoiskPersonId = filmsPersonsKinopoiskIdCounter["lastParsedPersonId"]
-    }
     let parsingQueueFilmsArr: any[] = await this.parserModel.find({entityType: "film", status: "waitForParsing"}, 'entityKinopoiskId').limit(dto.entitiesAmount).exec()
     let parsingQueueFilms: Set<any> = new Set(parsingQueueFilmsArr.map(entry => entry.entityKinopoiskId))
     console.log(parsingQueueFilms)
